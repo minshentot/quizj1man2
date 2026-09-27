@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2026 初一第三期考 · 课文注释 Quiz</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;background:#f5f6f8;color:#202124}
+.wrap{max-width:850px;margin:auto;padding:24px}.card{background:white;border:1px solid #ddd;border-radius:18px;padding:26px;box-shadow:0 5px 20px #0001}
+h1{font-size:24px;margin:0 0 8px}.sub{color:#666}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}
+.stat{background:#f1f3f4;padding:10px;border-radius:12px;text-align:center}.big{font-size:20px;font-weight:700}
+.badge{display:inline-block;padding:5px 10px;border-radius:99px;background:#e8f0fe;color:#174ea6;font-weight:700}
+#prompt{font-size:31px;font-weight:700;margin:25px 0 18px;line-height:1.45}.hint{font-size:14px;color:#777}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}.opt,button{border:1px solid #ccd0d5;background:white;border-radius:12px;padding:14px;font-size:18px;cursor:pointer}
+.opt:hover{background:#f5f8ff}.input{width:100%;padding:14px;border:2px solid #ccc;border-radius:12px;font-size:24px}
+.actions{display:flex;gap:10px;margin-top:14px}.primary{background:#1a73e8;color:white;border:0}.feedback{min-height:55px;margin-top:16px;font-size:18px;font-weight:700}
+.ok{color:#188038}.bad{color:#d93025}.progress{height:10px;background:#eee;border-radius:9px;overflow:hidden;margin-top:12px}.bar{height:100%;background:#1a73e8;width:0}
+small{color:#777}@media(max-width:600px){.options{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}#prompt{font-size:27px}}
+</style></head>
+<body><div class="wrap"><div class="card">
+<h1>2026 年 初一第三期考 · 课文注释 Quiz</h1>
+<div class="sub">四种题型随机出现 · 每种题型题库 30 题 · 连续答对 30 题毕业</div>
+<div class="stats">
+<div class="stat"><small>连续答对</small><div class="big" id="streak">0</div></div>
+<div class="stat"><small>答对</small><div class="big" id="correct">0</div></div>
+<div class="stat"><small>已答</small><div class="big" id="answered">0</div></div>
+<div class="stat"><small>毕业目标</small><div class="big">30</div></div>
+</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<p><span class="badge" id="type"></span></p>
+<div class="hint" id="instruction"></div><div id="prompt"></div><div id="answer"></div>
+<div class="feedback" id="feedback"></div>
+</div></div>
+<script>
+const V=[
+["搀","chān","轻轻扶着。"],["踌躇","chóu chú","犹豫不决。"],["凝滞","níng zhì","不灵活。"],["隐遁","yǐn dùn","隐藏、消失。"],
+["狼藉","láng jí","乱七八糟，杂乱不堪。"],["簌簌","sù sù","形容眼泪不断流下。"],["蹒跚","pán shān","腿脚不灵便，走路慢、摇摆的样子。"],
+["瑟缩","sè suō","身体因寒冷、受惊等而卷缩、抖动。"],["夜阑","yè lán","夜深。"],["赦免","shè miǎn","指免除或减轻对罪犯的刑罚。"],
+["画地为牢","huà dì wéi láo","比喻只许在指定的范围之内活动。"],["锒铛","láng dāng","铁锁链，一种刑具。"],["倏地","shū dì","迅速地。"],
+["蹿","cuān","向上或向前跳。"],["对峙","duì zhì","相对而立。"],["悻悻","xìng xìng","怨恨愤怒的样子。"],["瞅","chǒu","看。"],
+["咆哮","páo xiào","形容人暴怒喊叫。"],["按捺","àn nà","忍耐。"],["愕","è","惊讶，发呆。"]
+];
+// 30-item banks per type: first 20 cover every image entry; extra 10 repeat selected source items with different trap sets.
+const IDX=[...Array(20).keys(),0,1,2,3,4,5,6,7,8,9];
+const pyTraps={
+"chān":["chǎn","chàn","cān"],"chóu chú":["chǒu chú","chóu chù","chóu zhù"],"níng zhì":["níng zì","nǐng zhì","níng chí"],
+"yǐn dùn":["yǐn tún","yìn dùn","yǐn dūn"],"láng jí":["lǎng jí","láng jì","liáng jí"],"sù sù":["shù shù","sǔ sǔ","sù shù"],
+"pán shān":["pǎn shān","pán shàn","páng shān"],"sè suō":["shè suō","sè shuō","sě suō"],"yè lán":["yè lǎn","yě lán","yè nán"],
+"shè miǎn":["shě miǎn","shè mǎn","chè miǎn"],"huà dì wéi láo":["huá dì wéi láo","huà dì wèi láo","huà dì wéi lǎo"],
+"láng dāng":["lǎng dāng","láng dàng","liáng dāng"],"shū dì":["shù dì","shū de","sū dì"],"cuān":["cuàn","chuān","cuǎn"],
+"duì zhì":["duì zì","duì chí","duǐ zhì"],"xìng xìng":["xīng xīng","xǐng xǐng","xìng xīng"],"chǒu":["chóu","cǒu","chòu"],
+"páo xiào":["pào xiào","páo xiāo","báo xiào"],"àn nà":["ān nà","àn nǎ","àn là"],"è":["ě","é","èng"]
+};
+const meaningTraps={
+"搀":["用力推开。","紧紧抓住。","背在身上。"],"踌躇":["毫不迟疑。","心情愤怒。","行动迅速。"],"凝滞":["完全停止。","十分灵巧。","凝神注视。"],
+"隐遁":["躲在一旁观察。","公开出现。","偷偷跟随。"],"狼藉":["排列整齐。","荒凉无人。","非常破旧。"],"簌簌":["形容风不断吹。","形容身体不断发抖。","形容雨不断落下。"],
+"蹒跚":["走路很快、很稳。","因害怕而缩成一团。","脚受伤而完全不能走。"],"瑟缩":["因疲倦而躺下。","因生气而发抖。","因炎热而冒汗。"],
+"夜阑":["天刚亮。","傍晚。","半夜醒来。"],"赦免":["加重对罪犯的刑罚。","暂时停止审判。","把罪犯关押起来。"],
+"画地为牢":["在地上画牢房。","把人关进真正的牢房。","允许在任何地方活动。"],"锒铛":["一种兵器。","一种乐器。","门上的铁环。"],
+"倏地":["慢慢地。","突然停住。","安静地。"],"蹿":["向下跌落。","缓慢爬行。","原地站立。"],"对峙":["互相追赶。","背对而坐。","互相帮助。"],
+"悻悻":["高兴满足的样子。","害怕发抖的样子。","犹豫不决的样子。"],"瞅":["听。","喊。","盯住不放。"],"咆哮":["形容人小声说话。","形容人大声哭泣。","形容人开心欢呼。"],
+"按捺":["催促。","爆发。","逃避。"],"愕":["高兴，微笑。","生气，叫喊。","害怕，逃跑。"]
+};
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+let pools={1:shuffle(IDX),2:shuffle(IDX),3:shuffle(IDX),4:shuffle(IDX)}, pos={1:0,2:0,3:0,4:0};
+const typeEl=document.getElementById("type");
+const instructionEl=document.getElementById("instruction");
+const promptEl=document.getElementById("prompt");
+const answerEl=document.getElementById("answer");
+const feedbackEl=document.getElementById("feedback");
+const barEl=document.getElementById("bar");
+let streak=0,correct=0,answered=0,current=null,locked=false,lastType=0;
+function nextIndex(t){if(pos[t]>=pools[t].length){pools[t]=shuffle(IDX);pos[t]=0} return pools[t][pos[t]++];}
+function next(){
+ if(streak>=30)return graduate();
+ locked=false; document.getElementById("feedback").innerHTML="";
+ let types=[1,2,3,4].filter(x=>x!==lastType); let t=types[Math.floor(Math.random()*types.length)]; lastType=t;
+ let i=nextIndex(t),v=V[i]; current={t,i,v};
+ const labels=["","① 给词，选择正确拼音","② 给词，选择正确意思","③ 给拼音，输入词语","④ 给意思，输入词语"];
+ typeEl.textContent=labels[t];
+ instructionEl.textContent=t===1?"选出这个词的正确拼音。":t===2?"选出最准确的意思。":t===3?"根据拼音，输入图片中的词语。":"根据意思，输入图片中的词语。";
+ promptEl.textContent=t<=2?v[0]:(t===3?v[1]:v[2]);
+ if(t===1){renderOptions(shuffle([v[1],...pyTraps[v[1]]]),v[1])}
+ else if(t===2){renderOptions(shuffle([v[2],...meaningTraps[v[0]]]),v[2])}
+ else answerEl.innerHTML='<input id="inp" class="input" autocomplete="off" placeholder="输入答案"><div class="actions"><button class="primary" onclick="submitText()">提交答案</button></div>';
+ setTimeout(()=>{let x=document.getElementById("inp");if(x)x.focus()},50);
+}
+function renderOptions(opts,key){answerEl.innerHTML='<div class="options">'+opts.map(x=>`<button class="opt" onclick='choose(${JSON.stringify(x)},${JSON.stringify(key)})'>${x}</button>`).join("")+'</div>'}
+function choose(x,key){if(locked)return;grade(x===key,key)}
+function submitText(){if(locked)return;let x=document.getElementById("inp").value.trim().replace(/\s+/g,"");grade(x===current.v[0],current.v[0])}
+function grade(ok,key){
+ locked=true;answered++;
+ if(ok){correct++;streak++; feedbackEl.className="feedback ok";feedbackEl.textContent="✓ 正确！连续答对 "+streak+" 题。"; milestone(streak)}
+ else{streak=0;feedbackEl.className="feedback bad";feedbackEl.innerHTML="✗ 答错了。正确答案：<b>"+key+"</b><br><small>连续答对已归零。</small>"}
+ update(); setTimeout(next,ok?700:1500);
+}
+function update(){document.getElementById("streak").textContent=streak;document.getElementById("correct").textContent=correct;document.getElementById("answered").textContent=answered;barEl.style.width=Math.min(streak/30*100,100)+"%"}
+function tone(freq,dur,pattern=1){
+ let A=new (window.AudioContext||window.webkitAudioContext)(), now=A.currentTime;
+ for(let k=0;k<pattern;k++){let o=A.createOscillator(),g=A.createGain();o.connect(g);g.connect(A.destination);o.frequency.value=freq+k*100;g.gain.setValueAtTime(.14,now+k*.12);g.gain.exponentialRampToValueAtTime(.001,now+k*.12+dur);o.start(now+k*.12);o.stop(now+k*.12+dur)}
+}
+function milestone(n){if(n===5)tone(520,.18,2);if(n===10)tone(620,.18,3);if(n===20)tone(760,.2,4);if(n===30)tone(900,.22,6)}
+function graduate(){typeEl.textContent="🎓 毕业";instructionEl.textContent="";promptEl.textContent="连续答对 30 题！";answerEl.innerHTML='<button class="primary" onclick="restart()">重新挑战</button>';feedbackEl.className="feedback ok";feedbackEl.textContent="恭喜完成本轮训练！";update()}
+function restart(){streak=correct=answered=0;pos={1:0,2:0,3:0,4:0};for(let t=1;t<=4;t++)pools[t]=shuffle(IDX);lastType=0;update();next()}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("inp"))submitText()});next();
+</script></body></html>
